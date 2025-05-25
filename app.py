@@ -12,6 +12,7 @@ import socket # For gethostbyname
 APP_VERSION = "0.9.0"
 
 app = Flask(__name__)
+app.config['APPLICATION_ROOT'] = '/web-analyzer'
 
 # Helper function to get DNS information
 def get_dns_info(domain):
@@ -405,4 +406,6 @@ def download_pdf():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    # For development, you can still use app.run.
+    # For production, use a WSGI server like Gunicorn and this block might not be executed.
+    app.run(host='0.0.0.0', port=5001, debug=True)

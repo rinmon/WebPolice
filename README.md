@@ -38,12 +38,45 @@ URLを入力すると、そのサイトがどんな技術を使って構築さ�
     pip install -r requirements.txt
     ```
 
-4.  **Flaskアプリケーションを実行します**
-    ```bash
-    python app.py
-    ```
+4.  **開発環境での実行**
+    *   Flaskアプリケーションを開発モードで実行します。
+        ```bash
+        python app.py
+        ```
+    *   `app.py` 内で `app.config['APPLICATION_ROOT'] = '/web-analyzer'` が設定されているため、ブラウザで `http://127.0.0.1:5001/web-analyzer/` を開いて動作を確認します。
 
-5.  ブラウザで `http://127.0.0.1:5001/` を開きます。(ポートは `app.py` で変更可能です)
+5.  **本番環境でのデプロイ (Gunicorn + Apache リバースプロキシ)**
+    本番環境では、WSGIサーバーであるGunicornを使用してアプリケーションを起動し、Apacheをリバースプロキシとして設定することを推奨します。
+
+    a.  **Gunicornのインストールと実行**
+        ```bash
+        pip install gunicorn
+        gunicorn --workers 4 --bind 127.0.0.1:5001 app:app
+        ```
+        *   `--workers 4`: ワーカープロセスの数。サーバーのCPUコア数に応じて調整してください。
+        *   `--bind 127.0.0.1:5001`: GunicornがリッスンするIPアドレスとポート。Apacheからのリクエストを受け付けます。
+        *   `app:app`: `app.py` ファイル内のFlaskアプリケーションインスタンス (`app`) を指します。
+
+    b.  **Apache リバースプロキシ設定**
+        *   Flaskアプリケーション (`app.py`) には `app.config['APPLICATION_ROOT'] = '/web-analyzer'` が設定されている必要があります（設定済み）。
+        *   Apacheの設定ファイルに以下のリバースプロキシ設定を追記します。 (`mod_proxy` と `mod_proxy_http` モジュールが有効である必要があります)
+            ```apache
+            <IfModule mod_proxy.c>
+                <IfModule mod_proxy_http.c>
+                    ProxyRequests Off
+                    ProxyPreserveHost On
+
+                    <Location /web-analyzer/>
+                        ProxyPass http://127.0.0.1:5001/web-analyzer/
+                        ProxyPassReverse http://127.0.0.1:5001/web-analyzer/
+                    </Location>
+                </IfModule>
+            </IfModule>
+            ```
+        *   Apacheを再起動またはリロードして設定を反映させます。
+
+    c.  **アクセス**
+        *   ブラウザで `https://<あなたのドメイン>/web-analyzer/` を開きます。
 
 ## 技術スタック
 
