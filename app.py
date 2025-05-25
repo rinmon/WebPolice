@@ -13,7 +13,7 @@ import socket # For gethostbyname
 APP_VERSION = "0.9.0"
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_script_name=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.config['APPLICATION_ROOT'] = '/tools/webpolice'
 
 # Helper function to get DNS information
