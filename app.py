@@ -12,7 +12,7 @@ import socket # For gethostbyname
 APP_VERSION = "0.9.0"
 
 app = Flask(__name__)
-app.config['APPLICATION_ROOT'] = '/web-analyzer'
+app.config['APPLICATION_ROOT'] = '/tools/webpolice'
 
 # Helper function to get DNS information
 def get_dns_info(domain):
