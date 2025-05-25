@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウェブサイト技術分析レポート</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ウェブサイト技術分析レポート</h1>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <input type="text" id="urlInput" placeholder="分析したいウェブサイトのURLを入力 (例: example.com)">
+                <button id="analyzeButton">分析開始</button>
+            </section>
+
+            <section id="loadingIndicator" style="display: none;">
+                <p>分析中...</p>
+            </section>
+
+            <section id="reportSection" style="display: none;">
+                <h2>分析レポート: <span id="reportUrl"></span></h2>
+                
+                <div class="report-category" id="domainInfoCategory">
+                    <h3>ドメイン情報 (WHOIS)</h3>
+                    <pre id="domainInfo"></pre>
+                </div>
+
+                <div class="report-category" id="techStackCategory">
+                    <h3>使用技術</h3>
+                    <pre id="techStackInfo"></pre>
+                </div>
+
+                <div class="report-category" id="existenceDateCategory">
+                    <h3>サイト存在開始時期 (推定)</h3>
+                    <p id="existenceDateInfo"></p>
+                </div>
+                
+                <div class="report-category" id="seoInfoCategory">
+                    <h3>SEO情報</h3>
+                    <pre id="seoInfo"></pre>
+                </div>
+
+                <div class="report-category" id="dnsInfoCategory">
+                    <h3>DNS情報</h3>
+                    <pre id="dnsInfo"></pre>
+                </div>
+
+                <div class="report-category" id="serverInfoCategory">
+                    <h3>サーバー情報</h3>
+                    <pre id="serverInfo"></pre>
+                </div>
+
+                <button id="saveReportButton" style="display: none;">レポートを保存</button>
+                <button id="downloadPdfButton" style="display: none;">PDFでダウンロード</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 ウェブサイト技術分析ツール - Version: {{ app_version }}</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
