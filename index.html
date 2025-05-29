@@ -85,16 +85,23 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            table-layout: fixed;
         }
         th, td {
             border: 1px solid #bdc3c7;
             padding: 8px;
             text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
         }
         th {
             background-color: #ecf0f1;
             font-weight: bold;
             color: #2c3e50;
+            width: 30%;
+        }
+        td {
+            width: 70%;
         }
         .error {
             color: #e74c3c;

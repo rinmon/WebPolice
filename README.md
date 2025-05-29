@@ -1,6 +1,6 @@
 # ウェブサイト技術分析レポートツール
 
-![Version](https://img.shields.io/badge/version-0.9.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 
 URLを入力すると、そのサイトがどんな技術を使って構築されているかなどを詳細にレポートするWEBアプリケーションです。
 
@@ -20,66 +20,84 @@ URLを入力すると、そのサイトがどんな技術を使って構築さ�
 
 ## セットアップと実行
 
+### ローカル環境
+
 1.  **リポジトリをクローンします (もしGit管理する場合)**
     ```bash
-    # git clone <repository-url>
-    # cd <repository-directory>
+    git clone <repository-url>
+    cd <repository-directory>
     ```
 
-2.  **Python仮想環境の作成と有効化 (推奨)**
+2.  **必要なNode.jsパッケージをインストールします**
     ```bash
-    python -m venv venv
-    source venv/bin/activate  # macOS/Linux
-    # venv\Scripts\activate    # Windows
+    npm install
     ```
 
-3.  **必要なライブラリをインストールします**
+3.  **開発環境での実行**
     ```bash
-    pip install -r requirements.txt
+    npm start
     ```
 
-4.  **開発環境での実行**
-    *   Flaskアプリケーションを開発モードで実行します。
-        ```bash
-        python app.py
-        ```
-    *   `app.py` 内で `app.config['APPLICATION_ROOT'] = '/web-analyzer'` が設定されているため、ブラウザで `http://127.0.0.1:5001/tools/webpolice/` を開いて動作を確認します。
+4.  **アプリケーションへのアクセス**
+    ブラウザで `http://localhost:8080` を開いて動作を確認します。
 
-5.  **本番環境でのデプロイ (Gunicorn + Apache リバースプロキシ)**
-    本番環境では、WSGIサーバーであるGunicornを使用してアプリケーションを起動し、Apacheをリバースプロキシとして設定することを推奨します。
+### AWS Lightsail環境でのデプロイ
 
-    a.  **Gunicornのインストールと実行**
-        ```bash
-        pip install gunicorn
-        gunicorn --workers 4 --bind 127.0.0.1:5001 app:app
-        ```
-        *   `--workers 4`: ワーカープロセスの数。サーバーのCPUコア数に応じて調整してください。
-        *   `--bind 127.0.0.1:5001`: GunicornがリッスンするIPアドレスとポート。Apacheからのリクエストを受け付けます。
-        *   `app:app`: `app.py` ファイル内のFlaskアプリケーションインスタンス (`app`) を指します。
+1. **インスタンスの作成**
+   * AWS Lightsailコンソールにログインし、Node.jsインスタンスを作成します
+   * 少なくとも1GB RAM以上のプランを選択することをお勧めします
 
-    b.  **Apache リバースプロキシ設定**
-        *   Flaskアプリケーション (`app.py`) には `app.config['APPLICATION_ROOT'] = '/tools/webpolice'` が設定されている必要があります（設定済み）。
-        *   Apacheの設定ファイルに以下のリバースプロキシ設定を追記します。 (`mod_proxy` と `mod_proxy_http` モジュールが有効である必要があります)
-            ```apache
-            <IfModule mod_proxy.c>
-                <IfModule mod_proxy_http.c>
-                    ProxyRequests Off
-                    ProxyPreserveHost On
+2. **ファイアウォール設定**
+   * AWS Lightsailコンソールでインスタンスを選択し、「ネットワーキング」タブを開きます
+   * 「ファイアウォール」セクションで、TCP 8080ポートを開放します（アプリケーションが使用するポート）
 
-                    <Location /tools/webpolice/>
-                        ProxyPass http://127.0.0.1:5001/tools/webpolice/
-                        ProxyPassReverse http://127.0.0.1:5001/tools/webpolice/
-                    </Location>
-                </IfModule>
-            </IfModule>
-            ```
-        *   Apacheを再起動またはリロードして設定を反映させます。
+3. **アプリケーションのデプロイ**
+   * SSHを使用してLightsailインスタンスに接続します
+   * アプリケーションファイルをインスタンスに転送します（SFTPまたはGitを使用）
+   ```bash
+   # 例：SFTPを使用する場合
+   sftp -i <your-key.pem> bitnami@<your-instance-ip>
+   # または、Gitを使用する場合
+   git clone <repository-url>
+   ```
 
-    c.  **アクセス**
-        *   ブラウザで `https://<あなたのドメイン>/tools/webpolice/` を開きます。
+4. **依存関係のインストールと起動**
+   ```bash
+   cd /path/to/webpolice
+   chmod +x start.sh
+   ./start.sh
+   ```
+
+5. **永続的な実行のためのプロセス管理**
+   PM2を使用してアプリケーションをバックグラウンドで実行し、サーバー再起動時に自動的に起動するよう設定します。
+   ```bash
+   # PM2のインストール
+   npm install -g pm2
+   
+   # アプリケーションの起動
+   pm2 start server.js
+   
+   # 起動時に自動実行する設定
+   pm2 save
+   pm2 startup
+   # 表示されたコマンドを実行して設定を完了します
+   ```
+
+6. **アクセス**
+   * ブラウザで `http://<your-instance-ip>:8080` を開いてアプリケーションにアクセスします
+   
+7. **（オプション）カスタムドメインの設定**
+   * DNSレコードを設定して、カスタムドメインをLightsailインスタンスのIPアドレスに向けます
+   * Lightsailインスタンスに静的IPを割り当てることをお勧めします
+   * HTTPSを有効にするには、Let's Encryptを使用してSSL証明書を設定できます
 
 ## 技術スタック
 
-*   バックエンド: Python (Flask)
+*   バックエンド: Node.js (Express)
 *   フロントエンド: HTML, CSS, JavaScript
-*   その他ライブラリ: `python-whois`, `requests`, `builtwith`, `beautifulsoup4`, `WeasyPrint`, `dnspython` など (詳細は `requirements.txt` を参照)
+*   使用ライブラリ:
+    *   `express`: Webアプリケーションフレームワーク
+    *   `axios`: HTTPリクエスト
+    *   `whois-json`: WHOIS情報取得
+    *   `cheerio`: HTMLパース
+    *   `jspdf` & `html2canvas`: PDF生成
