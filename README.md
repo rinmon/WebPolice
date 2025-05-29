@@ -1,10 +1,11 @@
 # ウェブサイト技術分析レポートツール
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
+[![GitHub](https://img.shields.io/github/stars/rinmon/webpolice?style=social)](https://github.com/rinmon/webpolice)
 
 URLを入力すると、そのサイトがどんな技術を使って構築されているかなどを詳細にレポートするWEBアプリケーションです。
 
-## 主な機能 (予定)
+## 主な機能
 
 *   完全日本語版
 *   いつから存在するか (Wayback Machine APIなどを利用)
@@ -22,20 +23,27 @@ URLを入力すると、そのサイトがどんな技術を使って構築さ�
 
 ### ローカル環境
 
-1.  **リポジトリをクローンします (もしGit管理する場合)**
+1.  **リポジトリをクローンします**
     ```bash
-    git clone <repository-url>
-    cd <repository-directory>
+    git clone https://github.com/rinmon/webpolice.git
+    cd webpolice
     ```
 
-2.  **必要なNode.jsパッケージをインストールします**
+2.  **PHPバージョンを使用する場合**
+    * PHPがインストールされていることを確認
+    * Webサーバー（Apache、Nginxなど）にファイルを配置するか、PHPの内蔵サーバーを使用
     ```bash
+    # PHPの内蔵サーバーを使用する場合
+    php -S localhost:8080
+    ```
+
+3.  **Node.jsバージョンを使用する場合（従来版）**
+    ```bash
+    # 必要なパッケージをインストール
     npm install
-    ```
-
-3.  **開発環境での実行**
-    ```bash
-    npm start
+    
+    # サーバー起動
+    node server.js
     ```
 
 4.  **アプリケーションへのアクセス**
@@ -44,7 +52,7 @@ URLを入力すると、そのサイトがどんな技術を使って構築さ�
 ### AWS Lightsail環境でのデプロイ
 
 1. **インスタンスの作成**
-   * AWS Lightsailコンソールにログインし、Node.jsインスタンスを作成します
+   * AWS Lightsailコンソールにログインし、**Bitnami PHP**インスタンスを作成します
    * 少なくとも1GB RAM以上のプランを選択することをお勧めします
 
 2. **ファイアウォール設定**
@@ -61,37 +69,38 @@ URLを入力すると、そのサイトがどんな技術を使って構築さ�
    git clone <repository-url>
    ```
 
-4. **依存関係のインストールと起動**
+4. **デプロイ**
    ```bash
-   cd /path/to/webpolice
-   chmod +x start.sh
-   ./start.sh
+   # Bitnami PHPインスタンスのApacheドキュメントルートにファイルを配置
+   # 通常は /opt/bitnami/apache2/htdocs
+   cd /opt/bitnami/apache2/htdocs
+   git clone https://github.com/rinmon/webpolice.git
+   
+   # 必要なパーミッションを設定
+   chmod 755 -R webpolice
+   chmod 777 -R webpolice/tmp
    ```
 
-5. **永続的な実行のためのプロセス管理**
-   PM2を使用してアプリケーションをバックグラウンドで実行し、サーバー再起動時に自動的に起動するよう設定します。
-   ```bash
-   # PM2のインストール
-   npm install -g pm2
-   
-   # アプリケーションの起動
-   pm2 start server.js
-   
-   # 起動時に自動実行する設定
-   pm2 save
-   pm2 startup
-   # 表示されたコマンドを実行して設定を完了します
-   ```
+5. **アクセス**
+   * ブラウザで `http://<your-instance-ip>/webpolice` を開いてアプリケーションにアクセスします
 
-6. **アクセス**
-   * ブラウザで `http://<your-instance-ip>:8080` を開いてアプリケーションにアクセスします
-   
-7. **（オプション）カスタムドメインの設定**
+6. **（オプション）独自ドメインの設定**
    * DNSレコードを設定して、カスタムドメインをLightsailインスタンスのIPアドレスに向けます
    * Lightsailインスタンスに静的IPを割り当てることをお勧めします
    * HTTPSを有効にするには、Let's Encryptを使用してSSL証明書を設定できます
+   
+
 
 ## 技術スタック
+
+### PHPバージョン（推奨）
+
+*   バックエンド: PHP 7.4+
+*   フロントエンド: HTML, CSS, JavaScript
+*   使用ライブラリ:
+    *   `FPDF`: PDF生成
+
+### Node.jsバージョン（従来版）
 
 *   バックエンド: Node.js (Express)
 *   フロントエンド: HTML, CSS, JavaScript
